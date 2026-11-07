@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPERVISI AKADEMIK DAN ADMINISTRASI GURU</title>
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1e40af;
+            --secondary: #0284c7;
+            --success: #15803d;
+            --bg-light: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: #1e293b;
+        }
+        .sidebar {
+            background-color: var(--primary);
+            min-height: 100vh;
+            color: white;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar .nav-link {
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: #ffffff;
+        }
+        .badge-pns { background-color: #0284c7; color: white; }
+        .badge-pppk { background-color: #0d9488; color: white; }
+        .badge-gty { background-color: #d97706; color: white; }
+        
+        .table input.form-control, .table select.form-select {
+            border-color: #cbd5e1;
+        }
+        .table input.form-control:focus, .table select.form-select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 0.2rem rgba(2, 132, 199, 0.25);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; font-size: 10pt; }
+            .container-fluid, .row, .col-md-10, .col-md-9, .col-lg-10 { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+            .table-bordered th, .table-bordered td { border: 1px solid #000 !important; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3 col-lg-2 sidebar p-3 no-print d-flex flex-column">
+            <div class="d-flex align-items-center mb-4 px-2">
+                <i class="bi bi-shield-check text-warning fs-2 me-2"></i>
+                <div>
+                    <h6 class="fw-bold text-white mb-0" style="font-size:0.85rem; letter-spacing:0.5px;" id="sidebar-app-title">SUPERVISI AKADEMIK</h6>
+                    <small class="text-white-50" style="font-size:0.75rem;" id="sidebar-school-title">SDN MANGKURA II</small>
+                </div>
+            </div>
+            <hr class="text-white-50 mt-0">
+            <ul class="nav nav-pills flex-column mb-auto" id="mainNav">
+                <li class="nav-item"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('guru', event)"><i class="bi bi-people"></i> Data Guru</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('jadwal', event)"><i class="bi bi-calendar-week"></i> Jadwal Supervisi</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('perangkat', event)"><i class="bi bi-file-earmark-check"></i> Perangkat Ajar</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('observasi', event)"><i class="bi bi-eye"></i> Observasi Kelas</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('evaluasi', event)"><i class="bi bi-clipboard-data"></i> Rekap & Evaluasi</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('backup', event)"><i class="bi bi-database-down"></i> Backup & Restore</a></li>
+                <li><a href="#" class="nav-link" onclick="switchTab('pengaturan', event)"><i class="bi bi-gear"></i> Pengaturan</a></li>
+            </ul>
+            <hr class="text-white-50">
+            <div class="px-2 small text-white-50">
+                <i class="bi bi-hdd-network me-1"></i> Status Storage:<br>
+                <span id="storageStatus" class="badge bg-success mt-1">Aktif</span>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto p-4">
+            
+            <!-- Alert Storage Backup Warning -->
+            <div class="alert alert-warning alert-dismissible fade show no-print d-flex align-items-center shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+                <div>
+                    <strong>Pemberitahuan Storage:</strong> Seluruh data disimpan pada memori lokal browser perangkat ini. Lakukan <strong>Backup Data (.json)</strong> secara berkala agar data tetap aman saat histori browser dibersihkan.
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content-item">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold text-primary mb-1" id="disp-app-name">SUPERVISI AKADEMIK DAN ADMINISTRASI</h3>
+                        <p class="text-muted mb-0" id="disp-school-header">UPTD SPF SD NEGERI MANGKURA II | Tahun Pelajaran 2026/2027</p>
+                    </div>
+                    <button class="btn btn-outline-primary no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i> Cetak Ringkasan</button>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card card-custom p-3 border-start border-primary border-4">
+                            <small class="text-muted text-uppercase fw-bold">Total Guru Sasaran</small>
+                            <h2 class="fw-bold my-1 text-primary" id="dash-total-guru">17</h2>
+                            <small class="text-muted">Guru Terdaftar</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-custom p-3 border-start border-success border-4">
+                            <small class="text-muted text-uppercase fw-bold">Perangkat Diperiksa</small>
+                            <h2 class="fw-bold my-1 text-success" id="dash-perangkat-done">0</h2>
+                            <small class="text-success" id="dash-perangkat-pct">0% Selesai</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-custom p-3 border-start border-info border-4">
+                            <small class="text-muted text-uppercase fw-bold">Observasi Terlaksana</small>
+                            <h2 class="fw-bold my-1 text-info" id="dash-obs-done">0</h2>
+                            <small class="text-info" id="dash-obs-pct">0% Selesai</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-custom p-3 border-start border-warning border-4">
+                            <small class="text-muted text-uppercase fw-bold">Rata-Rata Nilai Sekolah</small>
+                            <h2 class="fw-bold my-1 text-warning" id="dash-avg-score">0.0</h2>
+                            <small class="text-muted" id="dash-avg-pred">-</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-list-check me-2"></i>Status Supervisi Guru</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Guru</th>
+                                    <th>NIP/NIK</th>
+                                    <th>Mapel / Kelas</th>
+                                    <th>Status</th>
+                                    <th>Target Fokus</th>
+                                    <th>Status Perangkat</th>
+                                    <th>Status Observasi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GURU TAB -->
+            <div id="tab-guru" class="tab-content-item d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-primary">Data Identitas Guru Sasaran</h4>
+                    <button class="btn btn-primary" onclick="showAddGuruModal()"><i class="bi bi-plus-circle me-1"></i> Tambah Guru</button>
+                </div>
+                <div class="card card-custom p-3 mb-3">
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <input type="text" id="search-guru" class="form-control" placeholder="Cari nama guru atau NIP..." onkeyup="filterGuruTable()">
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-custom p-3">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Guru</th>
+                                    <th>NIP/NIK</th>
+                                    <th>Mapel / Kelas</th>
+                                    <th>Status</th>
+                                    <th>Target Supervisi</th>
+                                    <th class="no-print" style="width: 120px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guru-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERANGKAT TAB -->
+            <div id="tab-perangkat" class="tab-content-item d-none">
+                <h4 class="fw-bold text-primary mb-3">Form Pemeriksaan Perangkat Pembelajaran</h4>
+                <div class="card card-custom p-4 mb-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Pilih Guru Sasaran</label>
+                            <select id="perangkat-guru-select" class="form-select form-select-lg" onchange="loadPerangkatForm()">
+                                <!-- Dynamic Options -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <form id="perangkatForm" onsubmit="event.preventDefault();">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:5%;">No</th>
+                                        <th style="width:35%;">Komponen Perangkat</th>
+                                        <th style="width:25%;">Status Kelengkapan</th>
+                                        <th style="width:35%;">Catatan & Rekomendasi Perbaikan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="perangkat-items-body"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Catatan Kesimpulan Periksa Perangkat</label>
+                                <textarea id="perangkat-catatan-umum" class="form-control" rows="3" placeholder="Masukkan kesimpulan pemeriksaan perangkat..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-0">Skor Perangkat: <span id="perangkat-score-val" class="badge bg-primary fs-5">0</span> / 100</h5>
+                            </div>
+                            <button type="button" class="btn btn-success btn-lg px-4" onclick="savePerangkatData()"><i class="bi bi-check-circle me-1"></i> Simpan Perangkat</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- OBSERVASI TAB -->
+            <div id="tab-observasi" class="tab-content-item d-none">
+                <h4 class="fw-bold text-primary mb-3">Form Observasi Pembelajaran Guru</h4>
+                <div class="card card-custom p-4 mb-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Pilih Guru Sasaran</label>
+                            <select id="obs-guru-select" class="form-select form-select-lg" onchange="loadObsForm()">
+                                <!-- Dynamic Options -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <form id="obsForm" onsubmit="event.preventDefault();">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:5%;">No</th>
+                                        <th style="width:35%;">Indikator Observasi</th>
+                                        <th style="width:20%;">Skor (1 - 4)</th>
+                                        <th style="width:40%;">Catatan Pengamatan Langsung / Bukti Real</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="obs-items-body"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-success"><i class="bi bi-hand-thumbs-up me-1"></i> Kelebihan / Hal Positif Pembelajaran</label>
+                                <textarea id="obs-kelebihan" class="form-control" rows="3" placeholder="Tuliskan aspek pembelajaran yang sudah sangat baik..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-warning"><i class="bi bi-exclamation-triangle me-1"></i> Aspek yang Perlu Ditingkatkan</label>
+                                <textarea id="obs-perbaikan" class="form-control" rows="3" placeholder="Tuliskan aspek yang memerlukan perbaikan..."></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold"><i class="bi bi-lightbulb me-1"></i> Rekomendasi Observer</label>
+                                <textarea id="obs-rekomendasi" class="form-control" rows="2" placeholder="Masukkan saran dan saran tindak lanjut..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-0">Nilai Observasi: <span id="obs-score-val" class="badge bg-primary fs-5">0</span> / 100</h5>
+                            </div>
+                            <button type="button" class="btn btn-success btn-lg px-4" onclick="saveObsData()"><i class="bi bi-check-circle me-1"></i> Simpan Observasi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- REKAP & EVALUASI TAB -->
+            <div id="tab-evaluasi" class="tab-content-item d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-primary">Rekapitulasi Nilai & Rencana Tindak Lanjut</h4>
+                    <button class="btn btn-primary no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i> Cetak Rekapitulasi</button>
+                </div>
+                <div class="card card-custom p-4 mb-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No</th>
+                                    <th class="text-start">Nama Guru</th>
+                                    <th>Status</th>
+                                    <th>Perangkat (40%)</th>
+                                    <th>Observasi (60%)</th>
+                                    <th>Nilai Akhir</th>
+                                    <th>Predikat</th>
+                                    <th>Rencana Tindak Lanjut</th>
+                                    <th class="no-print">Cetak Laporan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eval-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JADWAL TAB -->
+            <div id="tab-jadwal" class="tab-content-item d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-primary">Jadwal Pelaksanaan Supervisi</h4>
+                    <button class="btn btn-primary no-print" onclick="saveJadwalData()"><i class="bi bi-save me-1"></i> Simpan Perubahan Jadwal</button>
+                </div>
+                <div class="card card-custom p-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Guru</th>
+                                    <th>Mapel / Kelas</th>
+                                    <th>Pra-Observasi</th>
+                                    <th>Observasi Kelas</th>
+                                    <th>Pasca-Observasi</th>
+                                    <th>Supervisor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jadwal-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BACKUP TAB -->
+            <div id="tab-backup" class="tab-content-item d-none">
+                <h4 class="fw-bold text-primary mb-3">Backup & Restore Data</h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="fw-bold text-primary"><i class="bi bi-download me-2"></i>Ekspor Data Backup (.JSON)</h5>
+                            <p class="text-muted">Unduh seluruh data guru, periksa perangkat, observasi, jadwal dan pengaturan ke file backup lokal.</p>
+                            <button class="btn btn-primary mt-auto" onclick="exportData()"><i class="bi bi-file-earmark-arrow-down me-1"></i> Unduh File Backup</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="fw-bold text-success"><i class="bi bi-upload me-2"></i>Impor Data Backup (.JSON)</h5>
+                            <p class="text-muted">Pilih file backup `.json` untuk memulihkan seluruh data supervisi Anda.</p>
+                            <input type="file" id="import-file-input" class="form-control mb-3" accept=".json">
+                            <button class="btn btn-success" onclick="importData()"><i class="bi bi-file-earmark-arrow-up me-1"></i> Impor / Pulihkan Data</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PENGATURAN TAB -->
+            <div id="tab-pengaturan" class="tab-content-item d-none">
+                <h4 class="fw-bold text-primary mb-3">Pengaturan Identitas Sekolah</h4>
+                <div class="card card-custom p-4">
+                    <form id="settingsForm" onsubmit="event.preventDefault(); saveSettings();">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nama Aplikasi</label>
+                                <input type="text" id="cfg-app-name" class="form-control" value="SUPERVISI AKADEMIK DAN ADMINISTRASI">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nama Sekolah</label>
+                                <input type="text" id="cfg-school-name" class="form-control" value="UPTD SPF SD NEGERI MANGKURA II">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">NPSN</label>
+                                <input type="text" id="cfg-npsn" class="form-control" value="40307195">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Tahun Pelajaran</label>
+                                <input type="text" id="cfg-tp" class="form-control" value="2026/2027">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Semester</label>
+                                <select id="cfg-semester" class="form-select">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nama Kepala Sekolah</label>
+                                <input type="text" id="cfg-kepsek" class="form-control" value="ANDI WIRDAYANI, S.Pd., M.Pd">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">NIP Kepala Sekolah</label>
+                                <input type="text" id="cfg-nip-kepsek" class="form-control" value="19831015 200502 2 005">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-save me-1"></i> Simpan Pengaturan</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add/Edit Guru -->
+<div class="modal fade" id="guruModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="guruModalTitle">Data Guru Sasaran</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-guru-id">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nama Guru</label>
+                    <input type="text" id="m-guru-nama" class="form-control" required placeholder="Contoh: Nama Lengkap, S.Pd">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">NIP / NIK</label>
+                    <input type="text" id="m-guru-nip" class="form-control" placeholder="19800101 ...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Mata Pelajaran / Kelas</label>
+                    <input type="text" id="m-guru-mapel" class="form-control" placeholder="Contoh: Matematika / III">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Status Kepegawaian</label>
+                    <select id="m-guru-status" class="form-select">
+                        <option value="PNS">PNS</option>
+                        <option value="PPPK">PPPK</option>
+                        <option value="GTY">GTY</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Target Fokus Supervisi</label>
+                    <input type="text" id="m-guru-target" class="form-control" placeholder="Contoh: Fokus integrasi media digital">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveGuruModal()">Simpan Guru</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cetak Laporan Per Guru -->
+<div class="modal fade" id="printReportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header no-print">
+                <h5 class="modal-title fw-bold">Laporan Hasil Supervisi Akademik</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="report-modal-content">
+                <!-- Dynamic Print Content -->
+            </div>
+            <div class="modal-footer no-print">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i> Cetak Laporan Ini</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Alert -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print">
+    <div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-message">Data berhasil tersimpan secara permanen.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const DEFAULT_GURU_LIST = [
+    { id: 1, nama: "Andi Roslely Wahid, S.Pd", nip: "19691001 199603 2 003", mapel: "Matematika / III", status: "PNS", target: "Fokus integrasi media digital" },
+    { id: 2, nama: "Irma Abdullah, S.Pd", nip: "19771226 200901 2 005", mapel: "PJOK / III", status: "PNS", target: "Fokus pendekatan interaktif" },
+    { id: 3, nama: "Muh. Ishak, S.Pd", nip: "19870101 201001 2 014", mapel: "Tematik / IV", status: "PNS", target: "Fokus diferensiasi belajar" },
+    { id: 4, nama: "Rasima, S.Pd", nip: "19661209 201407 2 001", mapel: "Tematik / V", status: "PNS", target: "Fokus instrumen asesmen" },
+    { id: 5, nama: "Nur Asma, S.Pd., M.Pd.Gr", nip: "19911215 201903 2 019", mapel: "Tematik / I", status: "PPPK", target: "Fokus pendekatan interaktif" },
+    { id: 6, nama: "Syamsuriani Nurdin, S.Pd.I.Gr", nip: "19930314 201903 2 019", mapel: "PAIBP / All", status: "PPPK", target: "Fokus pendekatan interaktif" },
+    { id: 7, nama: "Firmansyah HN, S.Pd.I.Gr", nip: "19920710 201903 1 015", mapel: "PAIBP / All", status: "PPPK", target: "Fokus manajemen kelas" },
+    { id: 8, nama: "Fatmasari Dahlan, A.Ma", nip: "19B10609 200701 2 008", mapel: "Tematik / II", status: "PNS", target: "Fokus diferensiasi belajar" },
+    { id: 9, nama: "Asmiati, AZ. S.Pd", nip: "19781197 292221 2 010", mapel: "Tematik / VI", status: "PNS", target: "Fokus instrumen asesmen" },
+    { id: 10, nama: "Supriani, S.Pd.Gr", nip: "19840210 202221 2 026", mapel: "Bahasa Indonesia / IV", status: "PPPK", target: "Fokus pendekatan interaktif" },
+    { id: 11, nama: "Irawati, S.Pd.Gr", nip: "19840823 202221 2 026", mapel: "IPAS / V", status: "PNS", target: "Fokus integrasi media digital" },
+    { id: 12, nama: "Nurul Umaida, S.Pd.Gr", nip: "19960804 202321 2 021", mapel: "Tematik / I", status: "PPPK", target: "Fokus manajemen kelas" },
+    { id: 13, nama: "Dian Eka Ayudana llyas, S.Pd.Gr", nip: "19890522 202321 2 022", mapel: "Seni Budaya / III", status: "GTY", target: "Fokus diferensiasi belajar" },
+    { id: 14, nama: "Nurul Ainun, S.Pd.Gr", nip: "19940824 202321 2 030", mapel: "Matematika / V", status: "PNS", target: "Fokus instrumen asesmen" },
+    { id: 15, nama: "Arfiani Miladiya, S.Pd., M.Pd.Gr", nip: "19830110 202421 2 007", mapel: "Bahasa Inggris / IV", status: "PPPK", target: "Fokus pendekatan interaktif" },
+    { id: 16, nama: "Tety Dahnyar Armand, S.Pd.Gr", nip: "19860417 202421 2 012", mapel: "PJOK / VI", status: "PPPK", target: "Fokus pendekatan interaktif" },
+    { id: 17, nama: "Isthiana Asthiza, S.Pd", nip: "-", mapel: "Tematik / II", status: "PNS", target: "Fokus integrasi media digital" }
+];
+
+const PERANGKAT_ITEMS = [
+    "Kalender Pendidikan", "Program Tahunan (Prota)", "Program Semester (Promes)", 
+    "Capaian Pembelajaran (CP) / Silabus", "Tujuan Pembelajaran (TP)", 
+    "Alur Tujuan Pembelajaran (ATP)", "Modul Ajar / RPP", "Bahan Ajar & Media Pembelajaran", 
+    "LKPD (Lembar Kerja Peserta Didik)", "Instrumen & Rubrik Asesmen", "Daftar Nilai & Hasil Belajar"
+];
+
+const OBS_ITEMS = [
+    "Kegiatan pembukaan & apersepsi", "Penyampaian tujuan pembelajaran", "Penguasaan materi secara akurat",
+    "Penggunaan metode pembelajaran aktif", "Pemanfaatan media & peraga/digital", "Interaksi positif guru & peserta didik",
+    "Keaktifan & partisipasi peserta didik", "Pengelolaan kelas & efisiensi waktu", "Pelaksanaan asesmen formatif",
+    "Kegiatan penutup & refleksi bersama"
+];
+
+let appState = {
+    settings: {
+        appName: "SUPERVISI AKADEMIK DAN ADMINISTRASI",
+        schoolName: "UPTD SPF SD NEGERI MANGKURA II",
+        npsn: "40307195",
+        tp: "2026/2027",
+        semester: "Ganjil",
+        kepsek: "ANDI WIRDAYANI, S.Pd., M.Pd",
+        nipKepsek: "19831015 200502 2 005"
+    },
+    gurus: DEFAULT_GURU_LIST,
+    perangkatData: {},
+    obsData: {},
+    jadwalData: {}
+};
+
+let guruModalObj = null;
+let reportModalObj = null;
+
+// Initialize Storage and Load App Data
+function initStorage() {
+    try {
+        const saved = localStorage.getItem("SUPERVISI_APP_STATE");
+        if(saved) {
+            const parsed = JSON.parse(saved);
+            appState = Object.assign(appState, parsed);
+        }
+        document.getElementById('storageStatus').innerText = "LocalStorage Ready";
+        document.getElementById('storageStatus').className = "badge bg-success mt-1";
+    } catch(e) {
+        document.getElementById('storageStatus').innerText = "Memori Sesi";
+        document.getElementById('storageStatus').className = "badge bg-warning text-dark mt-1";
+    }
+    
+    // Ensure default jadwal entries if empty
+    appState.gurus.forEach(g => {
+        if(!appState.jadwalData[g.id]) {
+            appState.jadwalData[g.id] = {
+                pra: "2026-08-10",
+                obs: "2026-08-15",
+                pasca: "2026-08-17",
+                supervisor: appState.settings.kepsek
+            };
+        }
+    });
+
+    renderAll();
+}
+
+function saveAppData() {
+    try {
+        localStorage.setItem("SUPERVISI_APP_STATE", JSON.stringify(appState));
+    } catch(e) {
+        console.warn("Storage warning", e);
+    }
+    renderAll();
+}
+
+function showToast(msg) {
+    const toastEl = document.getElementById('liveToast');
+    document.getElementById('toast-message').innerText = msg;
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+
+// Navigation Tab Switcher
+function switchTab(tabId, evt) {
+    if(evt) evt.preventDefault();
+    
+    document.querySelectorAll('.tab-content-item').forEach(el => el.classList.add('d-none'));
+    const target = document.getElementById('tab-' + tabId);
+    if(target) target.classList.remove('d-none');
+
+    document.querySelectorAll('#mainNav .nav-link').forEach(el => el.classList.remove('active'));
+    if(evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+    }
+}
+
+// Global Render Manager
+function renderAll() {
+    updateSettingsHeader();
+    renderDashboard();
+    renderGuruTable();
+    populateGuruSelects();
+    renderEvaluasi();
+    renderJadwal();
+}
+
+// Settings Handlers
+function updateSettingsHeader() {
+    const s = appState.settings;
+    document.getElementById('disp-app-name').innerText = s.appName || "SUPERVISI AKADEMIK DAN ADMINISTRASI";
+    document.getElementById('disp-school-header').innerText = `${s.schoolName} | NPSN: ${s.npsn} | TP: ${s.tp} (${s.semester})`;
+    document.getElementById('sidebar-app-title').innerText = "SUPERVISI AKADEMIK";
+    document.getElementById('sidebar-school-title').innerText = s.schoolName;
+
+    document.getElementById('cfg-app-name').value = s.appName;
+    document.getElementById('cfg-school-name').value = s.schoolName;
+    document.getElementById('cfg-npsn').value = s.npsn;
+    document.getElementById('cfg-tp').value = s.tp;
+    document.getElementById('cfg-semester').value = s.semester;
+    document.getElementById('cfg-kepsek').value = s.kepsek;
+    document.getElementById('cfg-nip-kepsek').value = s.nipKepsek;
+}
+
+function saveSettings() {
+    appState.settings = {
+        appName: document.getElementById('cfg-app-name').value,
+        schoolName: document.getElementById('cfg-school-name').value,
+        npsn: document.getElementById('cfg-npsn').value,
+        tp: document.getElementById('cfg-tp').value,
+        semester: document.getElementById('cfg-semester').value,
+        kepsek: document.getElementById('cfg-kepsek').value,
+        nipKepsek: document.getElementById('cfg-nip-kepsek').value
+    };
+    saveAppData();
+    showToast("Pengaturan sekolah berhasil disimpan.");
+}
+
+// Data Guru Logic
+function renderGuruTable() {
+    const tbody = document.getElementById('guru-table-body');
+    tbody.innerHTML = '';
+    
+    appState.gurus.forEach((g, idx) => {
+        const badgeClass = g.status === 'PNS' ? 'badge-pns' : (g.status === 'PPPK' ? 'badge-pppk' : 'badge-gty');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td class="fw-bold">${g.nama}</td>
+            <td>${g.nip}</td>
+            <td>${g.mapel}</td>
+            <td><span class="badge ${badgeClass}">${g.status}</span></td>
+            <td><small class="text-muted">${g.target || '-'}</small></td>
+            <td class="no-print">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editGuru(${g.id})"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteGuru(${g.id})"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filterGuruTable() {
+    const q = document.getElementById('search-guru').value.toLowerCase();
+    const rows = document.querySelectorAll('#guru-table-body tr');
+    rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+    });
+}
+
+function showAddGuruModal() {
+    document.getElementById('edit-guru-id').value = '';
+    document.getElementById('guruModalTitle').innerText = 'Tambah Data Guru Sasaran';
+    document.getElementById('m-guru-nama').value = '';
+    document.getElementById('m-guru-nip').value = '';
+    document.getElementById('m-guru-mapel').value = '';
+    document.getElementById('m-guru-status').value = 'PNS';
+    document.getElementById('m-guru-target').value = '';
+    
+    guruModalObj = new bootstrap.Modal(document.getElementById('guruModal'));
+    guruModalObj.show();
+}
+
+function editGuru(id) {
+    const g = appState.gurus.find(item => item.id === id);
+    if(!g) return;
+    document.getElementById('edit-guru-id').value = g.id;
+    document.getElementById('guruModalTitle').innerText = 'Edit Data Guru Sasaran';
+    document.getElementById('m-guru-nama').value = g.nama;
+    document.getElementById('m-guru-nip').value = g.nip;
+    document.getElementById('m-guru-mapel').value = g.mapel;
+    document.getElementById('m-guru-status').value = g.status;
+    document.getElementById('m-guru-target').value = g.target || '';
+    
+    guruModalObj = new bootstrap.Modal(document.getElementById('guruModal'));
+    guruModalObj.show();
+}
+
+function saveGuruModal() {
+    const id = document.getElementById('edit-guru-id').value;
+    const nama = document.getElementById('m-guru-nama').value.trim();
+    if(!nama) {
+        alert("Nama guru wajib diisi!");
+        return;
+    }
+    
+    const guruData = {
+        id: id ? parseInt(id) : Date.now(),
+        nama: nama,
+        nip: document.getElementById('m-guru-nip').value.trim() || '-',
+        mapel: document.getElementById('m-guru-mapel').value.trim() || '-',
+        status: document.getElementById('m-guru-status').value,
+        target: document.getElementById('m-guru-target').value.trim() || '-'
+    };
+
+    if(id) {
+        const idx = appState.gurus.findIndex(g => g.id === parseInt(id));
+        if(idx !== -1) appState.gurus[idx] = guruData;
+    } else {
+        appState.gurus.push(guruData);
+        appState.jadwalData[guruData.id] = {
+            pra: "2026-08-10", obs: "2026-08-15", pasca: "2026-08-17", supervisor: appState.settings.kepsek
+        };
+    }
+
+    saveAppData();
+    if(guruModalObj) guruModalObj.hide();
+    showToast("Data guru berhasil diperbarui.");
+}
+
+function deleteGuru(id) {
+    if(confirm("Apakah Anda yakin ingin menghapus data guru ini? Data supervisi terkait juga akan terhapus.")) {
+        appState.gurus = appState.gurus.filter(g => g.id !== id);
+        delete appState.perangkatData[id];
+        delete appState.obsData[id];
+        delete appState.jadwalData[id];
+        saveAppData();
+        showToast("Data guru berhasil dihapus.");
+    }
+}
+
+// Select Inputs Dynamic Population
+function populateGuruSelects() {
+    const pSel = document.getElementById('perangkat-guru-select');
+    const oSel = document.getElementById('obs-guru-select');
+    
+    const currentPVal = pSel.value;
+    const currentOVal = oSel.value;
+
+    pSel.innerHTML = '<option value="">-- Pilih Guru --</option>';
+    oSel.innerHTML = '<option value="">-- Pilih Guru --</option>';
+
+    appState.gurus.forEach(g => {
+        pSel.innerHTML += `<option value="${g.id}">${g.nama} (${g.mapel})</option>`;
+        oSel.innerHTML += `<option value="${g.id}">${g.nama} (${g.mapel})</option>`;
+    });
+
+    if(currentPVal) pSel.value = currentPVal;
+    if(currentOVal) oSel.value = currentOVal;
+}
+
+// Perangkat Ajar Logic
+function loadPerangkatForm() {
+    const id = document.getElementById('perangkat-guru-select').value;
+    const tbody = document.getElementById('perangkat-items-body');
+    tbody.innerHTML = '';
+    
+    if(!id) {
+        document.getElementById('perangkat-score-val').innerText = '0';
+        document.getElementById('perangkat-catatan-umum').value = '';
+        return;
+    }
+
+    const saved = appState.perangkatData[id] || { items: {}, catatan: '' };
+
+    PERANGKAT_ITEMS.forEach((item, idx) => {
+        const itemData = saved.items[idx] || { status: '100', note: '' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="text-center">${idx + 1}</td>
+            <td><strong>${item}</strong></td>
+            <td>
+                <select class="form-select p-item-status" onchange="calcPerangkatScore()">
+                    <option value="100" ${itemData.status === '100' ? 'selected' : ''}>Ada & Lengkap (100%)</option>
+                    <option value="50" ${itemData.status === '50' ? 'selected' : ''}>Ada Tidak Lengkap (50%)</option>
+                    <option value="0" ${itemData.status === '0' ? 'selected' : ''}>Tidak Ada (0%)</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control p-item-note" value="${itemData.note || ''}" placeholder="Catatan perbaikan...">
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('perangkat-catatan-umum').value = saved.catatan || '';
+    calcPerangkatScore();
+}
+
+function calcPerangkatScore() {
+    const statuses = document.querySelectorAll('.p-item-status');
+    if(statuses.length === 0) return 0;
+    
+    let total = 0;
+    statuses.forEach(s => total += parseFloat(s.value));
+    const finalScore = Math.round(total / PERANGKAT_ITEMS.length);
+    document.getElementById('perangkat-score-val').innerText = finalScore;
+    return finalScore;
+}
+
+function savePerangkatData() {
+    const id = document.getElementById('perangkat-guru-select').value;
+    if(!id) {
+        alert("Pilih guru sasaran terlebih dahulu!");
+        return;
+    }
+
+    const itemStatuses = document.querySelectorAll('.p-item-status');
+    const itemNotes = document.querySelectorAll('.p-item-note');
+    const items = {};
+
+    itemStatuses.forEach((el, idx) => {
+        items[idx] = {
+            status: el.value,
+            note: itemNotes[idx].value
+        };
+    });
+
+    const score = calcPerangkatScore();
+    appState.perangkatData[id] = {
+        score: score,
+        catatan: document.getElementById('perangkat-catatan-umum').value,
+        items: items
+    };
+
+    saveAppData();
+    showToast("Pemeriksaan Perangkat Ajar berhasil disimpan!");
+}
+
+// Observasi Kelas Logic
+function loadObsForm() {
+    const id = document.getElementById('obs-guru-select').value;
+    const tbody = document.getElementById('obs-items-body');
+    tbody.innerHTML = '';
+
+    if(!id) {
+        document.getElementById('obs-score-val').innerText = '0';
+        document.getElementById('obs-kelebihan').value = '';
+        document.getElementById('obs-perbaikan').value = '';
+        document.getElementById('obs-rekomendasi').value = '';
+        return;
+    }
+
+    const saved = appState.obsData[id] || { items: {}, kelebihan: '', perbaikan: '', rekomendasi: '' };
+
+    OBS_ITEMS.forEach((item, idx) => {
+        const itemData = saved.items[idx] || { score: '4', note: '' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="text-center">${idx + 1}</td>
+            <td><strong>${item}</strong></td>
+            <td>
+                <select class="form-select o-item-score" onchange="calcObsScore()">
+                    <option value="4" ${itemData.score === '4' ? 'selected' : ''}>4 - Sangat Baik</option>
+                    <option value="3" ${itemData.score === '3' ? 'selected' : ''}>3 - Baik</option>
+                    <option value="2" ${itemData.score === '2' ? 'selected' : ''}>2 - Cukup</option>
+                    <option value="1" ${itemData.score === '1' ? 'selected' : ''}>1 - Kurang</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control o-item-note" value="${itemData.note || ''}" placeholder="Bukti pengamatan langsung...">
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('obs-kelebihan').value = saved.kelebihan || '';
+    document.getElementById('obs-perbaikan').value = saved.perbaikan || '';
+    document.getElementById('obs-rekomendasi').value = saved.rekomendasi || '';
+    calcObsScore();
+}
+
+function calcObsScore() {
+    const scores = document.querySelectorAll('.o-item-score');
+    if(scores.length === 0) return 0;
+    
+    let total = 0;
+    scores.forEach(s => total += parseFloat(s.value));
+    const maxScore = OBS_ITEMS.length * 4;
+    const finalScore = Math.round((total / maxScore) * 100);
+    document.getElementById('obs-score-val').innerText = finalScore;
+    return finalScore;
+}
+
+function saveObsData() {
+    const id = document.getElementById('obs-guru-select').value;
+    if(!id) {
+        alert("Pilih guru sasaran terlebih dahulu!");
+        return;
+    }
+
+    const itemScores = document.querySelectorAll('.o-item-score');
+    const itemNotes = document.querySelectorAll('.o-item-note');
+    const items = {};
+
+    itemScores.forEach((el, idx) => {
+        items[idx] = {
+            score: el.value,
+            note: itemNotes[idx].value
+        };
+    });
+
+    const score = calcObsScore();
+    appState.obsData[id] = {
+        score: score,
+        kelebihan: document.getElementById('obs-kelebihan').value,
+        perbaikan: document.getElementById('obs-perbaikan').value,
+        rekomendasi: document.getElementById('obs-rekomendasi').value,
+        items: items
+    };
+
+    saveAppData();
+    showToast("Hasil Observasi Pembelajaran berhasil disimpan!");
+}
+
+// Rekap & Evaluasi Logic
+function renderEvaluasi() {
+    const tbody = document.getElementById('eval-table-body');
+    tbody.innerHTML = '';
+
+    appState.gurus.forEach((g, idx) => {
+        const pData = appState.perangkatData[g.id];
+        const oData = appState.obsData[g.id];
+
+        const pScore = pData ? pData.score : 0;
+        const oScore = oData ? oData.score : 0;
+
+        const pWeighted = pScore * 0.4;
+        const oWeighted = oScore * 0.6;
+        const finalScore = Math.round(pWeighted + oWeighted);
+
+        let pred = '-';
+        let badgeColor = 'bg-secondary';
+        let rtl = 'Perlu Penyusunan Supervisi';
+
+        if(pData || oData) {
+            if(finalScore >= 91) { pred = 'A (Sangat Baik)'; badgeColor = 'bg-success'; rtl = 'Pengayaan & Pengimbasan Rekan Sejawat'; }
+            else if(finalScore >= 81) { pred = 'B (Baik)'; badgeColor = 'bg-primary'; rtl = 'Pembinaan Rutin & Pembiasaan Inovasi'; }
+            else if(finalScore >= 71) { pred = 'C (Cukup)'; badgeColor = 'bg-warning text-dark'; rtl = 'Pelatihan Perangkat & Pendampingan Mengajar'; }
+            else { pred = 'D (Kurang)'; badgeColor = 'bg-danger'; rtl = 'Bimbingan Khusus / Workshop Intensif'; }
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td class="text-start fw-bold">${g.nama}<br><small class="text-muted fw-normal">${g.mapel}</small></td>
+            <td><span class="badge ${g.status === 'PNS' ? 'badge-pns' : 'badge-pppk'}">${g.status}</span></td>
+            <td>${pData ? pScore : '<span class="text-muted">-</span>'}</td>
+            <td>${oData ? oScore : '<span class="text-muted">-</span>'}</td>
+            <td class="fw-bold fs-6">${pData || oData ? finalScore : '-'}</td>
+            <td><span class="badge ${badgeColor}">${pred}</span></td>
+            <td class="text-start"><small>${rtl}</small></td>
+            <td class="no-print">
+                <button class="btn btn-sm btn-outline-primary" onclick="openReportModal(${g.id})"><i class="bi bi-printer me-1"></i> Cetak</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Dashboard Dynamic Stats
+function renderDashboard() {
+    const totalGuru = appState.gurus.length;
+    let pDone = 0;
+    let oDone = 0;
+    let totalScoreSum = 0;
+    let evaluatedCount = 0;
+
+    const tbody = document.getElementById('dash-table-body');
+    tbody.innerHTML = '';
+
+    appState.gurus.forEach((g, idx) => {
+        const pData = appState.perangkatData[g.id];
+        const oData = appState.obsData[g.id];
+
+        if(pData) pDone++;
+        if(oData) oDone++;
+
+        let finalScore = 0;
+        if(pData || oData) {
+            const pScore = pData ? pData.score : 0;
+            const oScore = oData ? oData.score : 0;
+            finalScore = Math.round((pScore * 0.4) + (oScore * 0.6));
+            totalScoreSum += finalScore;
+            evaluatedCount++;
+        }
+
+        const pBadge = pData ? '<span class="badge bg-success">Selesai</span>' : '<span class="badge bg-secondary">Belum</span>';
+        const oBadge = oData ? '<span class="badge bg-success">Selesai</span>' : '<span class="badge bg-secondary">Belum</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td class="fw-bold">${g.nama}</td>
+            <td>${g.nip}</td>
+            <td>${g.mapel}</td>
+            <td><span class="badge ${g.status === 'PNS' ? 'badge-pns' : 'badge-pppk'}">${g.status}</span></td>
+            <td><small>${g.target || '-'}</small></td>
+            <td>${pBadge}</td>
+            <td>${oBadge}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('dash-total-guru').innerText = totalGuru;
+    
+    const pPct = totalGuru ? Math.round((pDone / totalGuru) * 100) : 0;
+    const oPct = totalGuru ? Math.round((oDone / totalGuru) * 100) : 0;
+    
+    document.getElementById('dash-perangkat-done').innerText = pDone;
+    document.getElementById('dash-perangkat-pct').innerText = `${pPct}% Selesai`;
+    
+    document.getElementById('dash-obs-done').innerText = oDone;
+    document.getElementById('dash-obs-pct').innerText = `${oPct}% Selesai`;
+
+    const avg = evaluatedCount ? (totalScoreSum / evaluatedCount).toFixed(1) : "0.0";
+    document.getElementById('dash-avg-score').innerText = avg;
+    
+    let avgPred = '-';
+    if(evaluatedCount) {
+        if(avg >= 91) avgPred = 'Predikat: Sangat Baik';
+        else if(avg >= 81) avgPred = 'Predikat: Baik';
+        else if(avg >= 71) avgPred = 'Predikat: Cukup';
+        else avgPred = 'Predikat: Kurang';
+    }
+    document.getElementById('dash-avg-pred').innerText = avgPred;
+}
+
+// Jadwal Supervisi Logic
+function renderJadwal() {
+    const tbody = document.getElementById('jadwal-table-body');
+    tbody.innerHTML = '';
+
+    appState.gurus.forEach((g, idx) => {
+        const j = appState.jadwalData[g.id] || { pra: '', obs: '', pasca: '', supervisor: appState.settings.kepsek };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="text-center">${idx + 1}</td>
+            <td class="fw-bold">${g.nama}</td>
+            <td>${g.mapel}</td>
+            <td><input type="date" class="form-control j-pra" data-id="${g.id}" value="${j.pra || ''}"></td>
+            <td><input type="date" class="form-control j-obs" data-id="${g.id}" value="${j.obs || ''}"></td>
+            <td><input type="date" class="form-control j-pasca" data-id="${g.id}" value="${j.pasca || ''}"></td>
+            <td><input type="text" class="form-control j-sup" data-id="${g.id}" value="${j.supervisor || appState.settings.kepsek}"></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function saveJadwalData() {
+    const praInputs = document.querySelectorAll('.j-pra');
+    const obsInputs = document.querySelectorAll('.j-obs');
+    const pascaInputs = document.querySelectorAll('.j-pasca');
+    const supInputs = document.querySelectorAll('.j-sup');
+
+    praInputs.forEach((el, idx) => {
+        const id = el.getAttribute('data-id');
+        appState.jadwalData[id] = {
+            pra: el.value,
+            obs: obsInputs[idx].value,
+            pasca: pascaInputs[idx].value,
+            supervisor: supInputs[idx].value
+        };
+    });
+
+    saveAppData();
+    showToast("Jadwal pelaksanaan supervisi berhasil disimpan!");
+}
+
+// Print Individual Report Modal Generator
+function openReportModal(guruId) {
+    const g = appState.gurus.find(item => item.id === guruId);
+    if(!g) return;
+
+    const s = appState.settings;
+    const pData = appState.perangkatData[guruId] || { score: 0, catatan: '-', items: {} };
+    const oData = appState.obsData[guruId] || { score: 0, kelebihan: '-', perbaikan: '-', rekomendasi: '-', items: {} };
+
+    const pScore = pData.score || 0;
+    const oScore = oData.score || 0;
+    const finalScore = Math.round((pScore * 0.4) + (oScore * 0.6));
+
+    let pred = 'Kurang';
+    if(finalScore >= 91) pred = 'Sangat Baik (A)';
+    else if(finalScore >= 81) pred = 'Baik (B)';
+    else if(finalScore >= 71) pred = 'Cukup (C)';
+
+    const html = `
+        <div class="text-center mb-4">
+            <h5 class="fw-bold mb-0">${s.schoolName}</h5>
+            <h4 class="fw-bold text-uppercase">LAPORAN HASIL SUPERVISI AKADEMIK</h4>
+            <p class="mb-0">Tahun Pelajaran ${s.tp} Semester ${s.semester}</p>
+            <hr class="border border-dark border-1 opacity-75">
+        </div>
+
+        <table class="table table-sm table-borderless mb-4">
+            <tr><td style="width:20%;"><strong>Nama Guru</strong></td><td>: ${g.nama}</td></tr>
+            <tr><td><strong>NIP/NIK</strong></td><td>: ${g.nip}</td></tr>
+            <tr><td><strong>Mata Pelajaran/Kelas</strong></td><td>: ${g.mapel}</td></tr>
+            <tr><td><strong>Fokus Supervisi</strong></td><td>: ${g.target || '-'}</td></tr>
+        </table>
+
+        <h6 class="fw-bold text-primary">A. Hasil Evaluasi Perangkat & Observasi</h6>
+        <table class="table table-bordered text-center align-middle mb-4">
+            <thead class="table-light">
+                <tr>
+                    <th>Komponen Evaluasi</th>
+                    <th>Bobot</th>
+                    <th>Nilai Komponen</th>
+                    <th>Nilai Tertimbang</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-start">Perangkat Pembelajaran</td>
+                    <td>40%</td>
+                    <td>${pScore}</td>
+                    <td>${(pScore * 0.4).toFixed(1)}</td>
+                </tr>
+                <tr>
+                    <td class="text-start">Observasi Pembelajaran Kelas</td>
+                    <td>60%</td>
+                    <td>${oScore}</td>
+                    <td>${(oScore * 0.6).toFixed(1)}</td>
+                </tr>
+                <tr class="fw-bold table-light">
+                    <td colspan="3" class="text-end">NILAI AKHIR / PREDIKAT:</td>
+                    <td>${finalScore} / ${pred}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h6 class="fw-bold text-primary">B. Catatan Kualitatif Observer</h6>
+        <div class="card p-3 mb-4 bg-light">
+            <p class="mb-1"><strong>Kelebihan Pembelajaran:</strong> ${oData.kelebihan || '-'}</p>
+            <p class="mb-1"><strong>Aspek Perlu Perbaikan:</strong> ${oData.perbaikan || '-'}</p>
+            <p class="mb-0"><strong>Rekomendasi Tindak Lanjut:</strong> ${oData.rekomendasi || '-'}</p>
+        </div>
+
+        <div class="row mt-5 text-center">
+            <div class="col-6">
+                <p>Guru Sasaran,</p>
+                <br><br><br>
+                <p class="fw-bold mb-0"><u>${g.nama}</u></p>
+                <small>NIP. ${g.nip}</small>
+            </div>
+            <div class="col-6">
+                <p>Kepala Sekolah / Observer,</p>
+                <br><br><br>
+                <p class="fw-bold mb-0"><u>${s.kepsek}</u></p>
+                <small>NIP. ${s.nipKepsek}</small>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('report-modal-content').innerHTML = html;
+    reportModalObj = new bootstrap.Modal(document.getElementById('printReportModal'));
+    reportModalObj.show();
+}
+
+// Backup Export & Import Logic
+function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `SUPERVISI_BACKUP_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast("File backup JSON berhasil diunduh.");
+}
+
+function importData() {
+    const fileInput = document.getElementById('import-file-input');
+    const file = fileInput.files[0];
+    if(!file) {
+        alert("Silakan pilih file format .json terlebih dahulu.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedState = JSON.parse(e.target.result);
+            if(importedState && importedState.gurus) {
+                appState = importedState;
+                saveAppData();
+                showToast("Data supervisi berhasil dipulihkan dari file backup!");
+            } else {
+                alert("Format file JSON tidak valid!");
+            }
+        } catch(err) {
+            alert("Gagal membaca file JSON backup.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Global Initialization Trigger
+window.onload = function() {
+    initStorage();
+};
+</script>
+</body>
+</html>
